@@ -45,3 +45,36 @@ export const getApplications = async (req, res) => {
     return res.status(500).json({ error: "Fetch failed" });
   }
 };
+
+// DELETE /applications/:id
+export const deleteApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const application = await Application.findById(id);
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    // Delete resume from Cloudinary
+    if (application.resumePublicId) {
+      await cloudinary.uploader.destroy(application.resumePublicId, {
+        resource_type: "raw",
+      });
+    }
+
+    // Delete application from database
+    await application.deleteOne();
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Application deleted successfully" 
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ 
+      success: false, 
+      error: "Delete failed" 
+    });
+  }
+};

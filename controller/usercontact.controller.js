@@ -1,4 +1,4 @@
-import Contact from "../models/UserContact.js";
+import UserContact from "../models/UserContact.js";
 import Coupon from "../models/Coupon.js";
 
 // POST /contacts
@@ -46,7 +46,7 @@ export const createContact = async (req, res) => {
       };
     }
 
-    const contact = await Contact.create({
+    const contact = await UserContact.create({
       name,
       email,
       phone,
@@ -71,7 +71,7 @@ export const createContact = async (req, res) => {
 // GET /contacts
 export const getContacts = async (req, res) => {
   try {
-    const contacts = await Contact.find().sort({ createdAt: -1 });
+    const contacts = await UserContact.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -91,7 +91,7 @@ export const getContactById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const contact = await Contact.findById(id);
+    const contact = await UserContact.findById(id);
     if (!contact) {
       return res.status(404).json({
         success: false,
@@ -115,21 +115,57 @@ export const getContactById = async (req, res) => {
 export const updateContact = async (req, res) => {
   try {
     const { id } = req.params;
+    const updateData = req.body;
 
-    const updatedContact = await Contact.findByIdAndUpdate(
+    const updatedContact = await UserContact.findByIdAndUpdate(
       id,
-      { $set: req.body },
+      updateData,
       { new: true, runValidators: true }
     );
 
+    if (!updatedContact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+
     return res.status(200).json({
       success: true,
+      message: "Contact updated successfully",
       data: updatedContact,
     });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
-      message: "Invalid ID",
+      message: error.message,
     });
   }
 };
+
+// DELETE /contacts/:id
+export const deleteUserContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedContact = await UserContact.findByIdAndDelete(id);
+
+    if (!deletedContact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+

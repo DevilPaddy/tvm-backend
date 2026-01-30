@@ -38,6 +38,10 @@ const ApplicationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    resumePublicId: {
+        type: String,
+        required: true
+    },
 },
     { timestamps: true }
 );
